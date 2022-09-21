@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 	address addresses = { 0x00, 0x00, 0x00 };
 
 	// Your code should start here
-
+	struct symbol* symbolTable = { NULL };		// Initializing table here.
 }
 
 void performPass1(struct symbol* symbolTable[], char* filename, address* addresses) {

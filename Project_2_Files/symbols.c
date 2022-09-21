@@ -7,7 +7,11 @@
 int computeHash(char* input);
 
 int computeHash(char* symbolName) {
+    int hash_value = 0;
 
+    for(int index = 0; index < strlen(symbolName); index++) { hash_value += symbolName[index]; }// end for loop
+
+	return hash_value % SYMBOL_TABLE_SIZE;
 }
 
 void displaySymbolTable(struct symbol* symbolTable[]) {
