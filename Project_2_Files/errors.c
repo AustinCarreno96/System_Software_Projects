@@ -1,6 +1,5 @@
 #include "headers.h"
 
-void displayError(int errorType, char* errorInfo)
-{
+void displayError(int errorType, char* errorInfo) {
 	
 }

@@ -6,18 +6,15 @@ enum directives {
 	ERROR, BYTE, END, RESB, RESW, START, WORD
 };
 
-int getMemoryAmount(int directiveType, char* string)
-{
+int getMemoryAmount(int directiveType, char* string) {
 
 }
 
-int isDirective(char* string) 
-{
+int isDirective(char* string)  {
 
 }
 
-bool isStartDirective(int directiveType)
-{
+bool isStartDirective(int directiveType) {
 
 }
 

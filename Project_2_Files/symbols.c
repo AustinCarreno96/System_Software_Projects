@@ -6,22 +6,18 @@
 
 int computeHash(char* input);
 
-int computeHash(char* symbolName)
-{
+int computeHash(char* symbolName) {
 
 }
 
-void displaySymbolTable(struct symbol* symbolTable[])
-{
+void displaySymbolTable(struct symbol* symbolTable[]) {
 
 }
 
-void initializeSymbolTable(struct symbol* symbolTable[])
-{
+void initializeSymbolTable(struct symbol* symbolTable[]) {
 
 }
 
-void insertSymbol(struct symbol* symbolTable[], char symbolName[], int symbolAddress)
-{
+void insertSymbol(struct symbol* symbolTable[], char symbolName[], int symbolAddress) {
 
 }
