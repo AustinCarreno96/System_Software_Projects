@@ -37,10 +37,8 @@ segment* prepareSegments(char* statement) {
 
 // Do no modify any part of this function
 void trim(char value[]) {
-	for (int x = 0; x < SEGMENT_SIZE; x++)
-	{
-		if (value[x] == SPACE)
-		{
+	for (int x = 0; x < SEGMENT_SIZE; x++) {
+		if (value[x] == SPACE) {
 			value[x] = '\0';
 		}
 	}
