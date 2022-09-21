@@ -79,7 +79,7 @@ void insertStudent(struct student* hashTable[], struct student* temp) {
 	int key = computeHash(temp->name);	// computing hash key
 	int original_key = key;
 	while(hashTable[key] != NULL) {
-		if(temp->name == hashTable[key]->name) { 
+		if(strcmp(temp->name, hashTable[key]->name)) { 
 			displayError(E_DUPLICATE_NAME, temp->name);
 		} else { 
 			key += 1; 
