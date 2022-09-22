@@ -15,11 +15,39 @@ int main(int argc, char* argv[]) {
 	address addresses = { 0x00, 0x00, 0x00 };
 
 	// Your code should start here
+	// Checking if all command line args have been passed
+	if (argc < 2) {
+		displayError(E_MISSING_COMMAND, " ");
+	}
+
 	struct symbol* symbolTable = { NULL };		// Initializing table here.
 }
 
 void performPass1(struct symbol* symbolTable[], char* filename, address* addresses) {
-	
+	FILE *input;			// file pointer
+	char* statement = NULL;	// each line in file
+    size_t len = 0;
+    ssize_t read = 0;
+
+	// Opening file
+	input = fopen(filename, "r");
+
+	// Checking to see if file is present
+	if(input == NULL) {
+		displayError(FILE_NOT_FOUND, filename);
+	} else {
+        printf("\n\nSymbol Table Log\n");
+        printf("--------------\n");
+
+        while((read = getline(&statement, &len, input)) != -1) {			
+			struct segment* temp = prepareSegments(statement);
+
+
+            memset(statement, 0, INPUT_BUF_SIZE);		// resetting memory at the record array for new record
+        
+        } // end while loop
+	}// end if / else
+    fclose(input);
 }
 
 // Do no modify any part of this function

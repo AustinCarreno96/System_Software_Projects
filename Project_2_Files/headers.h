@@ -13,22 +13,19 @@ enum errors {
 	MISSING_COMMAND_LINE_ARGUMENTS, OUT_OF_MEMORY, OUT_OF_RANGE_BYTE, OUT_OF_RANGE_WORD
 };
 
-typedef struct address
-{
+typedef struct address {
 	int start;
 	int current;
 	int increment;
 } address;
 
-typedef struct segment
-{
+typedef struct segment {
 	char first[SEGMENT_SIZE];
 	char second[SEGMENT_SIZE];
 	char third[SEGMENT_SIZE];
 } segment;
 
-typedef struct symbol
-{
+typedef struct symbol {
 	char name[NAME_SIZE];
 	int address;
 } symbol;
