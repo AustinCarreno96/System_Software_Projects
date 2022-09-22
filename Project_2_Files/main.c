@@ -41,6 +41,7 @@ void performPass1(struct symbol* symbolTable[], char* filename, address* address
 
         while((read = getline(&statement, &len, input)) != -1) {			
 			struct segment* temp = prepareSegments(statement);
+			if(temp->first == '#') { continue }
 
 
             memset(statement, 0, INPUT_BUF_SIZE);		// resetting memory at the record array for new record
