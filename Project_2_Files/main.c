@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 	// if (argc < 2) {
 	// 	displayError(E_MISSING_COMMAND, " ");
 	// }
-
+	printf("TESTESTESTESTTEST");
 	struct symbol* symbolTable[SYMBOL_TABLE_SIZE] = { NULL };		// Initializing table here.
 	performPass1(symbolTable, argv[1], &addresses);
 }
