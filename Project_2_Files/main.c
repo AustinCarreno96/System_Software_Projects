@@ -15,10 +15,12 @@ int main(int argc, char* argv[]) {
 	struct address addresses = { 0x00, 0x00, 0x00 };
 
 	// Your code should start here
+
 	// Checking if all command line args have been passed
 	// if (argc < 2) {
 	// 	displayError(E_MISSING_COMMAND, " ");
 	// }
+	
 	printf("TESTESTESTESTTEST");
 	struct symbol* symbolTable[SYMBOL_TABLE_SIZE] = { NULL };		// Initializing table here.
 	performPass1(symbolTable, argv[1], &addresses);
@@ -42,9 +44,9 @@ void performPass1(struct symbol* symbolTable[], char* filename, address* address
 
         while((read = getline(&statement, &len, input)) != -1) {			
 			struct segment* temp = prepareSegments(statement);
-			if(strcmp(temp->first, "#") == 0) { continue; }
+			if(strcmp(temp.first, "#") == 0) { continue; }
 
-			if(strcmp(temp->second, "START") == 0) {printf("TEST");}
+			if(strcmp(temp.second, "START") == 0) {printf("TEST");}
 
 
             memset(statement, 0, INPUT_BUF_SIZE);		// resetting memory at the record array for new record
