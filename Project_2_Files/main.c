@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 		displayError(E_MISSING_COMMAND, " ");
 	}
 
-	struct symbol* symbolTable = { NULL };		// Initializing table here.
+	struct symbol* symbolTable[SYMBOL_TABLE_SIZE] = { NULL };		// Initializing table here.
 	performPass1(symbolTable, argv[1], addresses);
 }
 
