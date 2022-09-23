@@ -16,9 +16,9 @@ int main(int argc, char* argv[]) {
 
 	// Your code should start here
 	// Checking if all command line args have been passed
-	if (argc < 2) {
-		displayError(E_MISSING_COMMAND, " ");
-	}
+	// if (argc < 2) {
+	// 	displayError(E_MISSING_COMMAND, " ");
+	// }
 
 	struct symbol* symbolTable[SYMBOL_TABLE_SIZE] = { NULL };		// Initializing table here.
 	performPass1(symbolTable, argv[1], &addresses);
