@@ -12,7 +12,7 @@ void trim(char string[]);
 
 int main(int argc, char* argv[]) {
 	// Do not modify this statement
-	address addresses = { 0x00, 0x00, 0x00 };
+	struct address addresses = { 0x00, 0x00, 0x00 };
 
 	// Your code should start here
 	// Checking if all command line args have been passed
