@@ -14,7 +14,7 @@ symbols.o: symbols.c
 	gcc -c symbols.c
 
 main.o: main.c
-	gcc -c main.c
+	gcc -c main.c ./test0.sic
 
 clean:
 	rm *.o symbolTable

@@ -43,6 +43,8 @@ void performPass1(struct symbol* symbolTable[], char* filename, address* address
 			struct segment* temp = prepareSegments(statement);
 			if(strcmp(temp->first, "#") == 0) { continue; }
 
+			if(strcmp(temp->second, "START") == 0) {printf("TEST");}
+
 
             memset(statement, 0, INPUT_BUF_SIZE);		// resetting memory at the record array for new record
         
