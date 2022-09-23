@@ -14,7 +14,7 @@ symbols.o: symbols.c
 	gcc -c symbols.c -o symbols.o
 
 main.o: main.c
-	gcc -c main.c ./test0.sic -o main.o
+	gcc -c main.c ./test0.sic -o main.o -include headers.h
 
 clean:
 	rm *.o symbolTable
