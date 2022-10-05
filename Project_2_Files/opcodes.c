@@ -22,9 +22,23 @@ opcode opcodes[OPCODE_ARRAY_SIZE] = {
 };
 
 int getOpcodeValue(char* opcode) {
-	
+	for (int index = 0; index < OPCODE_ARRAY_SIZE; index++) {
+		if(strcmp(opcode, opcodes[index].name) == 0) {
+			return opcodes[index].value;
+		}
+	}
+	return -1;
 }
 
 bool isOpcode(char* string) {
-
+	// for (int index = 0; index < OPCODE_ARRAY_SIZE; index++) {
+	// 	if(strcmp(string, opcodes[index].name) == 0) {
+	// 		return true;
+	// 	}
+	// }
+	int opcode_value = getOpcodeValue(string);
+	if(opcode_value == -1) { return false; }
+	else { return true; }
+	// return false;
+	
 }

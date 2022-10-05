@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <regex.h>
 
 #define NAME_SIZE 7
 #define SEGMENT_SIZE 9
