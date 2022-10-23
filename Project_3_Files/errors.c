@@ -28,6 +28,9 @@ void displayError(int errorType, char* errorInfo) {
         case OUT_OF_RANGE_WORD:
             printf("ERROR: Word Value (%s) Out of Range [-16,777,216 to 16,777,215].\n", errorInfo);
             break;
+        case UNDEFINED_SYMBOL:
+            printf("ERROR: Undefined Symbol\n");
+            break;
         default:
             break;
     }
