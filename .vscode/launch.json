@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [],
+    "preLaunchTask": "build", // label of your build task
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "gcc main.c directives.c errors.c opcodes.c symbols.c -include headers.h -lm",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+    
+}

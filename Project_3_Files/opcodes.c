@@ -33,7 +33,6 @@ int getOpcodeValue(char* opcode) {
 
 bool isOpcode(char* string) {
 	int opcode_value = getOpcodeValue(string);
-	
 	if(opcode_value == -1) { return false; }
 	else { return true; }
 }

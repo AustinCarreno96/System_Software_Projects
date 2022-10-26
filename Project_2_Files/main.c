@@ -45,7 +45,6 @@ void performPass1(struct symbol* symbolTable[], char* filename, address* address
 	input = fopen(filename, "r");
 
 	// Checking to see if file is present
-	printf("%p", input);
 	if(input == NULL) {
 		displayError(FILE_NOT_FOUND, filename);
 		exit(0);
@@ -95,6 +94,7 @@ void performPass1(struct symbol* symbolTable[], char* filename, address* address
 						exit(0);
 					}
 				}
+				
 				// Starting address indexing
 				if(isStartDirective(second_segment)) {
 					// addresses->start = atoi(temp->third);

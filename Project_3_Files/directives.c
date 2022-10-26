@@ -9,7 +9,23 @@ enum directives {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 int getByteWordValue(int directiveType, char* string) {
+	int end_index = strlen(string) - 1;		// Getting last index of string
+	char* buffer;
+	char* final_buffer;
 
+	if (string[0] == 'C') {
+		// // Grabbing values inside quotations
+		// for(int index = 0; index <= end_index; index++) {
+		// 	sprintf(buffer, "%s", string);
+		// 	// strcat(final_buffer, buffer);
+		// }	
+	} 
+	// else if (string[0] == 'X') {
+	// 	printf("%s", final_buffer);
+	// 	return atoi(final_buffer);
+	// }
+
+	return 0;//TODO: Return Value
 }
 
 int getMemoryAmount(int directiveType, char* string) {
@@ -39,7 +55,6 @@ int getMemoryAmount(int directiveType, char* string) {
 			memory_amount = 3;
 			break;
 	}
-
 	return memory_amount;
 }
 
@@ -47,7 +62,9 @@ int getMemoryAmount(int directiveType, char* string) {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 bool isDataDirective(int directiveType) {
-	
+	if (directiveType == BYTE || directiveType == WORD) {
+		return true;
+	} else { return false; }
 }
 
 int isDirective(char* string) {
@@ -69,16 +86,18 @@ int isDirective(char* string) {
 
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
-bool isEndDirective(int directiveType)
-{
-	
+bool isEndDirective(int directiveType) {
+	if (directiveType == END) {
+		return true;
+	} else { return false; }
 }
 
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
-bool isReserveDirective(int directiveType)
-{
-	
+bool isReserveDirective(int directiveType) {
+	if (directiveType == RESW || directiveType == RESB) {
+		return true;
+	} else { return false; }
 }
 
 bool isStartDirective(int directiveType) {
