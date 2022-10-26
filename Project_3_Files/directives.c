@@ -10,22 +10,27 @@ enum directives {
 // Add the following function to your existing Project 2 code
 int getByteWordValue(int directiveType, char* string) {
 	int end_index = strlen(string) - 1;		// Getting last index of string
-	char* buffer;
-	char* final_buffer;
+	char* buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
+	char* final_buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
+	int* test_2 = (int*)malloc(sizeof(char) * strlen(string) + 1);
+	char* end;
 
-	if (string[0] == 'C') {
-		// // Grabbing values inside quotations
-		// for(int index = 0; index <= end_index; index++) {
-		// 	sprintf(buffer, "%s", string);
-		// 	// strcat(final_buffer, buffer);
-		// }	
-	} 
-	// else if (string[0] == 'X') {
-	// 	printf("%s", final_buffer);
-	// 	return atoi(final_buffer);
-	// }
-
-	return 0;//TODO: Return Value
+	if(directiveType == WORD) {
+		return atoi(string);
+	} else {
+		if(string[0] == 'C') {
+			for (int index = 2; index < strlen(string) - 1; index++) {
+				test_2[index] = (int)(string[index]);
+				sprintf(buffer, "%X", test_2[index]);
+				strcat(final_buffer, buffer);
+			}
+			return strtol(final_buffer, &end, 16);
+		} else if(string[0]== 'X') {
+			for (int index = 2; index < strlen(string) - 1; index++) { final_buffer[index - 2] = string[index]; }
+			return strtol(final_buffer, &end, 16);
+		}
+	}
+	return 0;
 }
 
 int getMemoryAmount(int directiveType, char* string) {

@@ -31,8 +31,8 @@ void removeChar(char* string, char removed_char);
 
 void printlstFile(address* addresses, struct segment* seg, int value);
 
-// TODO: I have added all steps from project_3 todo list. I now need to go back and check on memory after each iteration of 
-//		 of the while loop. 
+// TODO: I have added all steps from project_3 todo list. getByteWordValue working correctly now. Now need to figure out 
+//		 how to make files correctly to begin writing to them. fopen is not working as wanted.
 
 
 int main(int argc, char* argv[]) {
@@ -56,7 +56,6 @@ char* createFilename(char* filename, const char* extension) {
     char* temp1 = (char*)malloc(sizeof(char) * strlen(filename) + 1);
 	strcpy(temp1, filename);
 	strcpy(temp, strtok(temp1, "."));
-	// exit(0);
 	strcat(temp, extension);
 	
 	return temp;
@@ -157,7 +156,6 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 	objectFileData objectData = { 0, { 0x0 }, { "\0" }, 0, 0x0, 0, { 0 }, 0, '\0', 0x0 };
 
 	// Your code should start here
-
 	// FILE pointers for all files needed to be opened / written in / etc.
 	FILE *input;
 	FILE *lst_output;
@@ -192,8 +190,8 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 		exit(0);
 	} else {
 		// Opening lst and obj files
-		lst_output = fopen(lst_file, "w");
-		// obj_output = fopen(obj_file, "w");
+		lst_output = fopen(lst_file, "w+");
+		obj_output = fopen(obj_file, "w");
 
 		while((read = getline(&statement, &len, input)) != -1) {
 			if(statement[0] == 35) { continue; }	// Checking for comments
@@ -257,10 +255,11 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 							resetObjectFileData(&objectData, addresses);
 						}
 						char* temp_third_seg = temp_segment->third;
-						removeChar(temp_third_seg, '\'');
-						removeChar(temp_third_seg, '\'');
+						// removeChar(temp_third_seg, '\'');
+						// removeChar(temp_third_seg, '\'');
 
 						// TODO: Commented out code causing segmentation fault
+						printf("%s\t", temp_segment->second);
 						int value = getByteWordValue(second_segment_directive, temp_segment->third);
 						objectData.recordEntries->numBytes = addresses->increment;
 						objectData.recordEntries->value = value;
@@ -283,8 +282,7 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 				int opcode_value = getOpcodeValue(temp_segment->second);
 				opcode_value *= OPCODE_MULTIPLIER;
 				
-				// printf("Opcode: %s\tValue: %X\n",temp_segment->second, opcode_value);
-				
+				// TODO: Come back to. Might remove removeChar()
 				if(strstr(temp_segment->third, ",X")) {
 					opcode_value += X_MULTIPLER;				// Getting new opcode value with X_MULTIPLIER
 					removeChar(temp_segment->third, ',');			// Removing the ',' and 'X' from third segment
@@ -310,7 +308,7 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 					addresses->increment = 3;
 				}
 			}
-			printlstFile(addresses, temp_segment, objectData.recordEntries->value);
+			// printlstFile(addresses, temp_segment, objectData.recordEntries->value);
 			addresses->current += addresses->increment;		// Increment current address
 		}// end while
 	}// end if / else
@@ -355,7 +353,13 @@ void trim(char value[]) {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
-	
+	// if(strcmp(segments->second, "START") == 0){
+	// 	fprintf(file, "%X\t%s\t%s\t%X\n", address, segments->first, segments->second, opcode);	
+	// } else if(strcmp(segments->second, "END") == 0) {
+	// 	fprintf(file, "%X\t%s\t%s\t%s", address, segments->first, segments->second, segments->third);
+	// } else {
+	// 	fprintf(file, "%X\t%s\t%s\t%s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
+	// }
 }
 
 // To implement Pass 2 of the assembler for Project 3,
@@ -390,9 +394,9 @@ int hexToDecimal(struct segment* temp) {
 void removeChar(char* string, char removed_char) {
     int i, j;
     i = 0;
-    while(i<strlen(string)) {
+    while(i < strlen(string)) {
         if (string[i] == removed_char) { 
-            for (j = i; j<strlen(string); j++) { string[j]=string[j+1]; }
+            for (j = i; j < strlen(string); j++) { string[j] = string[j+1]; }
         } else { i++; }
     }// end while
 }// end removeChar()
