@@ -31,8 +31,7 @@ void removeChar(char* string, char removed_char);
 
 void printlstFile(address* addresses, struct segment* seg, int value);
 
-// TODO: I have added all steps from project_3 todo list. getByteWordValue working correctly now. Now need to figure out 
-//		 how to make files correctly to begin writing to them. fopen is not working as wanted.
+// TODO: Lst file is written correctly. Time to move to obj file next.
 
 
 int main(int argc, char* argv[]) {
@@ -45,6 +44,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	struct symbol* symbolTable[SYMBOL_TABLE_SIZE] = { NULL };		// Initializing table here.
+	
 	performPass1(symbolTable, argv[1], &addresses);
 	performPass2(symbolTable, argv[1], &addresses);
 }
@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 char* createFilename(char* filename, const char* extension) {
+	removeChar(filename, '/');
 	char* temp = (char*)malloc(sizeof(char) * strlen(filename) + 1);
     char* temp1 = (char*)malloc(sizeof(char) * strlen(filename) + 1);
 	strcpy(temp1, filename);
@@ -181,16 +182,16 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 	// Creating lst and obj file names
 	char* lst_file = createFilename(filename, ".lst");
 	char* obj_file = createFilename(filename, ".obj");
-
+	
 	// Opening sic file
 	input = fopen(filename, "r");
-
+	
 	if(input == NULL) {
 		displayError(FILE_NOT_FOUND, filename);
 		exit(0);
 	} else {
 		// Opening lst and obj files
-		lst_output = fopen(lst_file, "w+");
+		lst_output = fopen(lst_file, "w");
 		obj_output = fopen(obj_file, "w");
 
 		while((read = getline(&statement, &len, input)) != -1) {
@@ -213,8 +214,6 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 						addresses->current = addresses->start;
 
 						writeToObjFile(obj_output, objectData);
-
-						// TODO: Testing
 						writeToLstFile(lst_output, addresses->start, temp_segment, BLANK_INSTRUCTION);
 
 						// addresses->current = hexToDecimal(temp);
@@ -223,27 +222,21 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 					} else if(isEndDirective(second_segment_directive)) {
 						if(objectData.recordByteCount > 0) {
 							writeToObjFile(obj_output, objectData);
-
-							// TODO: Testing
 							resetObjectFileData(&objectData, addresses);
 						}
 
 						objectData.recordType = 'E';
 
 						writeToObjFile(obj_output, objectData);
-
-						// TODO: Testing
-						writeToLstFile(lst_output, addresses->start, temp_segment, BLANK_INSTRUCTION);
+						writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
 					} else if(isReserveDirective(second_segment_directive)) {
 						if(objectData.recordByteCount > 0) {
 							writeToObjFile(obj_output, objectData);
-
-							// TODO: Testing
 							resetObjectFileData(&objectData, addresses);
 						}
 
-						// TODO: Testing
-						writeToLstFile(lst_output, addresses->start, temp_segment, BLANK_INSTRUCTION);
+						writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
+						
 						addresses->increment = getMemoryAmount(second_segment_directive, temp_segment->third);
 						objectData.recordAddress = addresses->increment;
 					} else if(isDataDirective(second_segment_directive)) {
@@ -254,20 +247,16 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 							writeToObjFile(obj_output, objectData);
 							resetObjectFileData(&objectData, addresses);
 						}
-						char* temp_third_seg = temp_segment->third;
-						// removeChar(temp_third_seg, '\'');
-						// removeChar(temp_third_seg, '\'');
 
-						// TODO: Commented out code causing segmentation fault
-						printf("%s\t", temp_segment->second);
 						int value = getByteWordValue(second_segment_directive, temp_segment->third);
+						
 						objectData.recordEntries->numBytes = addresses->increment;
 						objectData.recordEntries->value = value;
 
 						objectData.recordEntryCount++;
 						objectData.recordByteCount += addresses->increment;
 
-						// writeToLstFile(lst_output, addresses->start, temp_segment, getByteWordValue(second_segment_directive, temp_segment->third));
+						writeToLstFile(lst_output, addresses->current, temp_segment, getByteWordValue(second_segment_directive, temp_segment->third));
 					}
 				// }
 			} else if(isOpcode(temp_segment->second)) {
@@ -294,8 +283,8 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 					// Testing for third segment in symbol table
 					int addr = getSymbolAddress(symbolTable, temp_segment->third);
 					if(addr == -1) {
-						// displayError(UNDEFINED_SYMBOL, "");
-						// exit(0);
+						displayError(UNDEFINED_SYMBOL, "");
+						exit(0);
 					}
 					
 					opcode_value += addr;
@@ -304,9 +293,9 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 					objectData.recordEntryCount += 1;
 					objectData.recordByteCount += 3;
 
-					writeToLstFile(lst_output, addresses->start, temp_segment, opcode_value);
+					writeToLstFile(lst_output, addresses->current, temp_segment, opcode_value);
 					addresses->increment = 3;
-				}
+				} else { writeToLstFile(lst_output, addresses->current, temp_segment, 0x4C0000); }
 			}
 			// printlstFile(addresses, temp_segment, objectData.recordEntries->value);
 			addresses->current += addresses->increment;		// Increment current address
@@ -353,13 +342,43 @@ void trim(char value[]) {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
-	// if(strcmp(segments->second, "START") == 0){
-	// 	fprintf(file, "%X\t%s\t%s\t%X\n", address, segments->first, segments->second, opcode);	
-	// } else if(strcmp(segments->second, "END") == 0) {
-	// 	fprintf(file, "%X\t%s\t%s\t%s", address, segments->first, segments->second, segments->third);
-	// } else {
-	// 	fprintf(file, "%X\t%s\t%s\t%s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
+	char* addr= (char*)malloc(sizeof(char) * sizeof(opcode) + 1);
+	char* final_addr = (char*)malloc(sizeof(char) * sizeof(opcode) + 1);
+
+	// sprintf(addr, "%X", opcode);
+	// if(sizeof(addr) < 6 && (strcmp(segments->second, "BYTE") != 0)) {
+	// 	int diff = 6 - sizeof(addr);
+		
+	// 	for(int index = 0; index < diff; index++) { final_addr[index] = '0'; }
+	// 	// strcat(final_addr, addr); 
 	// }
+
+
+	if(strcmp(segments->second, "START") == 0){
+		fprintf(file, "%-5X\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, address);	
+	} else if(strcmp(segments->second, "END") == 0) {
+		fprintf(file, "%-5X\t%-5s\t%-5s\t%s", address, segments->first, segments->second, segments->third);
+	} else if(strcmp(segments->second, "RESB") == 0 || strcmp(segments->second, "RESW") == 0) {
+		fprintf(file, "%-5X\t%-5s\t%-5s\t%s\n", address, segments->first, segments->second, segments->third);
+	} else {
+		if(strcmp(segments->second, "BYTE") == 0) {
+			fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
+		} else {
+			if(opcode < 0x10) {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t00000%X\n", address, segments->first, segments->second, segments->third, opcode);
+			} else if(opcode < 0x100) {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t0000%X\n", address, segments->first, segments->second, segments->third, opcode);
+			} else if(opcode < 0x1000) {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t000%X\n", address, segments->first, segments->second, segments->third, opcode);
+			} else if(opcode < 0x10000) {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t00%X\n", address, segments->first, segments->second, segments->third, opcode);
+			} else if(opcode < 0x100000) {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t0%X\n", address, segments->first, segments->second, segments->third, opcode);
+			} else {
+				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
+			}
+		}
+	}
 }
 
 // To implement Pass 2 of the assembler for Project 3,

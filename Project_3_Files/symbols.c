@@ -14,21 +14,38 @@ int computeHash(char* symbolName) {
 	return hash_value % SYMBOL_TABLE_SIZE;
 }
 
-void displaySymbolTable(struct symbol* symbolTable[]) { }
+void displaySymbolTable(struct symbol* symbolTable[]) {
+    printf("\n\n\nSymbol Table Contents\n");
+	printf("---------------------\n\n");
+
+	printf("=======================================================================\n");
+	printf("\tIndex\t\t\tName\t\t\tAddress\n");
+	printf("=======================================================================\n");
+	for(int index = 0; index < SYMBOL_TABLE_SIZE; index++) {
+		if(symbolTable[index] != NULL) {
+            printf("%11d\t\t\t%-23s 0x%X\n", index, symbolTable[index]->name, symbolTable[index]->address);
+		} else { continue; }
+	}// end for loop
+    printf("\n\n");
+    return;
+ }
 
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 int getSymbolAddress(struct symbol* symbolArray[], char* string) {
 	int key = computeHash(string);
+    
     if(strcmp(symbolArray[key]->name, string) == 0) {
         return symbolArray[key]->address;
     } else {
-        for(int index = key + 1; index < sizeof(*symbolArray); index++) {
+        int index = key + 1;
+        while(symbolArray[index] != NULL) {
             if(strcmp(symbolArray[index]->name, string) == 0) {
                 return symbolArray[index]->address;
             } else if(symbolArray[index] == NULL) {
                 return -1;
             }// end if / else if
+            index++;
         }// end for loop
         return -1;
     }// end if / else

@@ -9,7 +9,6 @@ enum directives {
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 int getByteWordValue(int directiveType, char* string) {
-	int end_index = strlen(string) - 1;		// Getting last index of string
 	char* buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
 	char* final_buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
 	int* test_2 = (int*)malloc(sizeof(char) * strlen(string) + 1);
@@ -27,6 +26,7 @@ int getByteWordValue(int directiveType, char* string) {
 			return strtol(final_buffer, &end, 16);
 		} else if(string[0]== 'X') {
 			for (int index = 2; index < strlen(string) - 1; index++) { final_buffer[index - 2] = string[index]; }
+			int t = strtol(final_buffer, &end, 16);
 			return strtol(final_buffer, &end, 16);
 		}
 	}
