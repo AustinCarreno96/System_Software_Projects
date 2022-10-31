@@ -359,14 +359,14 @@ void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
 	} else if(strcmp(segments->second, "RESB") == 0 || strcmp(segments->second, "RESW") == 0) {
 		fprintf(file, "%-5X\t%-5s\t%-5s\t%s\n", address, segments->first, segments->second, segments->third);
 	} else if(strcmp(segments->second, "RSUB") == 0) {
-		fprintf(file, "%-5X\t%-5s\t%-17s\t%0.6X\n", address, segments->first, segments->second, opcode);
+		fprintf(file, "%-5X\t%-5s\t%-17s\t%06X\n", address, segments->first, segments->second, opcode);
 	} else if(segments->flag) {
-		fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s,X\t%0.6X\n", address, segments->first, segments->second, segments->third, opcode);
+		fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s,X\t%06X\n", address, segments->first, segments->second, segments->third, opcode);
 	} else {
 		if(strcmp(segments->second, "BYTE") == 0) {
-			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%0.2X\n", address, segments->first, segments->second, segments->third, opcode);
+			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%02X\n", address, segments->first, segments->second, segments->third, opcode);
 		} else {
-			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%0.6X\n", address, segments->first, segments->second, segments->third, opcode);
+			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%06X\n", address, segments->first, segments->second, segments->third, opcode);
 		}
 	}
 }
@@ -376,12 +376,12 @@ void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
 // Add the following function to your existing Project 2 code
 void writeToObjFile(FILE* file, objectFileData fileData) {
 	if(fileData.recordType == 'H') {
-		fprintf(file, "%c%s %0.6X%0.6X\n", fileData.recordType, fileData.programName, 
+		fprintf(file, "%c%s %06X%06X\n", fileData.recordType, fileData.programName, 
 										   fileData.startAddress, fileData.programSize);
 	} else if(fileData.recordType == 'E') {
-		fprintf(file, "%c%0.6X", fileData.recordType, fileData.startAddress);
+		fprintf(file, "%c%06X", fileData.recordType, fileData.startAddress);
 	} else if(fileData.recordType == 'T') {
-		fprintf(file, "%c%0.6X%0.2X", fileData.recordType, fileData.recordAddress, fileData.recordByteCount);
+		fprintf(file, "%c%06X%02X", fileData.recordType, fileData.recordAddress, fileData.recordByteCount);
 
 		for(int index = 0; index < fileData.recordEntryCount; index++) {
 			if (fileData.recordEntries[index].numBytes == 1) {
