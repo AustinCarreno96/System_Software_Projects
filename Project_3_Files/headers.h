@@ -32,6 +32,7 @@ typedef struct segment
 	char first[SEGMENT_SIZE];
 	char second[SEGMENT_SIZE];
 	char third[SEGMENT_SIZE];
+	bool flag;
 } segment;
 
 typedef struct symbol

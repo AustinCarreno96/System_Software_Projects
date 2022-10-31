@@ -29,8 +29,6 @@ void writeToObjFile(FILE* file, objectFileData data);
 int hexToDecimal(struct segment* temp);
 void removeChar(char* string, char removed_char);
 
-void printlstFile(address* addresses, struct segment* seg, int value);
-
 // TODO: Lst file is written correctly. Time to move to obj file next.
 
 
@@ -49,6 +47,7 @@ int main(int argc, char* argv[]) {
 	performPass2(symbolTable, argv[1], &addresses);
 }
 
+
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 char* createFilename(char* filename, const char* extension) {
@@ -61,6 +60,7 @@ char* createFilename(char* filename, const char* extension) {
 	
 	return temp;
 }
+
 
 void performPass1(struct symbol* symbolTable[], char* filename, address* addresses) {
 	FILE *input;			// file pointer
@@ -201,64 +201,63 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 			
 			// TODO: Find a way to get rid of
 			int second_segment_directive = isDirective(temp_segment->second);
-			
+			objectData.recordType = 'T';
+
 			if(isDirective(temp_segment->second) > 0) {
-					// Starting address indexing
-					if(isStartDirective(second_segment_directive)) {
-						objectData.recordType = 'H';
-						strcpy(objectData.programName, temp_segment->first);
-						objectData.startAddress = addresses->start;
-						objectData.recordAddress = addresses->start;
-						objectData.programSize = addresses->current - addresses->start;
+				if(isStartDirective(second_segment_directive)) {
+					objectData.recordType = 'H';
+					strcpy(objectData.programName, temp_segment->first);
+					objectData.startAddress = addresses->start;
+					objectData.recordAddress = addresses->start;
+					objectData.programSize = addresses->current - addresses->start;
 
-						addresses->current = addresses->start;
+					addresses->current = addresses->start;
 
+					writeToObjFile(obj_output, objectData);
+					writeToLstFile(lst_output, addresses->start, temp_segment, BLANK_INSTRUCTION);
+					resetObjectFileData(&objectData, addresses);		// TODO: Testing
+					continue;
+				} else if(isEndDirective(second_segment_directive)) {
+					if(objectData.recordByteCount > 0) {
 						writeToObjFile(obj_output, objectData);
-						writeToLstFile(lst_output, addresses->start, temp_segment, BLANK_INSTRUCTION);
-
-						// addresses->current = hexToDecimal(temp);
-						// addresses->start = hexToDecimal(temp);
-						continue;
-					} else if(isEndDirective(second_segment_directive)) {
-						if(objectData.recordByteCount > 0) {
-							writeToObjFile(obj_output, objectData);
-							resetObjectFileData(&objectData, addresses);
-						}
-
-						objectData.recordType = 'E';
-
-						writeToObjFile(obj_output, objectData);
-						writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
-					} else if(isReserveDirective(second_segment_directive)) {
-						if(objectData.recordByteCount > 0) {
-							writeToObjFile(obj_output, objectData);
-							resetObjectFileData(&objectData, addresses);
-						}
-
-						writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
-						
-						addresses->increment = getMemoryAmount(second_segment_directive, temp_segment->third);
-						objectData.recordAddress = addresses->increment;
-					} else if(isDataDirective(second_segment_directive)) {
-						addresses->increment = getMemoryAmount(second_segment_directive, temp_segment->third);
-						diff = MAX_RECORD_BYTE_COUNT - addresses->increment;
-
-						if(objectData.recordByteCount > 0) {
-							writeToObjFile(obj_output, objectData);
-							resetObjectFileData(&objectData, addresses);
-						}
-
-						int value = getByteWordValue(second_segment_directive, temp_segment->third);
-						
-						objectData.recordEntries->numBytes = addresses->increment;
-						objectData.recordEntries->value = value;
-
-						objectData.recordEntryCount++;
-						objectData.recordByteCount += addresses->increment;
-
-						writeToLstFile(lst_output, addresses->current, temp_segment, getByteWordValue(second_segment_directive, temp_segment->third));
+						resetObjectFileData(&objectData, addresses);
 					}
-				// }
+
+					objectData.recordType = 'E';
+
+					writeToObjFile(obj_output, objectData);
+					writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
+					// resetObjectFileData(&objectData, addresses);		// TODO: Testing
+					// TODO: Maybe call resetObjectFileData here?
+				} else if(isReserveDirective(second_segment_directive)) {
+					if(objectData.recordByteCount > 0) {
+						writeToObjFile(obj_output, objectData);
+						resetObjectFileData(&objectData, addresses);
+					}
+
+					writeToLstFile(lst_output, addresses->current, temp_segment, BLANK_INSTRUCTION);
+						
+					addresses->increment = getMemoryAmount(second_segment_directive, temp_segment->third);
+					objectData.recordAddress += addresses->increment;
+				} else if(isDataDirective(second_segment_directive)) {
+					addresses->increment = getMemoryAmount(second_segment_directive, temp_segment->third);
+					diff = MAX_RECORD_BYTE_COUNT - addresses->increment;
+
+					if(objectData.recordByteCount > diff) {
+						writeToObjFile(obj_output, objectData);
+						resetObjectFileData(&objectData, addresses);
+					}
+
+					int value = getByteWordValue(second_segment_directive, temp_segment->third);
+					int index = objectData.recordEntryCount;
+					objectData.recordEntries[index].numBytes = addresses->increment;
+					objectData.recordEntries[index].value = value;
+
+					objectData.recordEntryCount++;
+					objectData.recordByteCount += addresses->increment;
+
+					writeToLstFile(lst_output, addresses->current, temp_segment, getByteWordValue(second_segment_directive, temp_segment->third));
+				}
 			} else if(isOpcode(temp_segment->second)) {
 				diff = MAX_RECORD_BYTE_COUNT - 3;
 
@@ -270,32 +269,35 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 					
 				int opcode_value = getOpcodeValue(temp_segment->second);
 				opcode_value *= OPCODE_MULTIPLIER;
-				
-				// TODO: Come back to. Might remove removeChar()
-				if(strstr(temp_segment->third, ",X")) {
-					opcode_value += X_MULTIPLER;				// Getting new opcode value with X_MULTIPLIER
-					removeChar(temp_segment->third, ',');			// Removing the ',' and 'X' from third segment
-					removeChar(temp_segment->third, 'X');
-					opcode_value += getSymbolAddress(symbolTable, temp_segment->third);		// Adding symbol Address to opcode value
-				}
 
 				if(getOpcodeValue(temp_segment->second) != 0x4C) {
+					if(strstr(temp_segment->third, ",X")) {
+						temp_segment->flag = true;
+						opcode_value += X_MULTIPLER;				// Getting new opcode value with X_MULTIPLIER
+					
+						removeChar(temp_segment->third, ',');			// Removing the ',' and 'X' from third segment
+						removeChar(temp_segment->third, 'X');
+					}
 					// Testing for third segment in symbol table
 					int addr = getSymbolAddress(symbolTable, temp_segment->third);
 					if(addr == -1) {
 						displayError(UNDEFINED_SYMBOL, "");
 						exit(0);
 					}
-					
-					opcode_value += addr;
-					objectData.recordEntries->numBytes = 3;
-					objectData.recordEntries->value = opcode_value;
-					objectData.recordEntryCount += 1;
-					objectData.recordByteCount += 3;
 
-					writeToLstFile(lst_output, addresses->current, temp_segment, opcode_value);
-					addresses->increment = 3;
-				} else { writeToLstFile(lst_output, addresses->current, temp_segment, 0x4C0000); }
+					opcode_value += addr;
+				}
+
+				int index = objectData.recordEntryCount;
+
+				objectData.recordEntries[index].numBytes = 3;
+				objectData.recordEntries[index].value = opcode_value;
+				objectData.recordEntryCount++;
+				objectData.recordByteCount += 3;
+
+				writeToLstFile(lst_output, addresses->current, temp_segment, opcode_value);
+					
+				addresses->increment = 3;
 			}
 			// printlstFile(addresses, temp_segment, objectData.recordEntries->value);
 			addresses->current += addresses->increment;		// Increment current address
@@ -305,6 +307,7 @@ void performPass2(struct symbol* symbolTable[], char* filename, address* address
 	fclose(lst_output);
 	fclose(obj_output);
 }// end performPass2()
+
 
 segment* prepareSegments(char* statement) {
 	struct segment* temp = (segment*)malloc(sizeof(segment));
@@ -318,13 +321,16 @@ segment* prepareSegments(char* statement) {
 	return temp;
 }
 
+
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 void resetObjectFileData(objectFileData* objectData, address* addresses) {
+	
 	objectData->recordAddress = addresses->current;
 	objectData->recordByteCount = 0;
 	objectData->recordEntryCount = 0;
 }
+
 
 // To implement Pass 2 of the assembler for Project 3,
 // Use the following function to replace the function
@@ -339,20 +345,12 @@ void trim(char value[]) {
 	}
 }
 
+
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
 	char* addr= (char*)malloc(sizeof(char) * sizeof(opcode) + 1);
 	char* final_addr = (char*)malloc(sizeof(char) * sizeof(opcode) + 1);
-
-	// sprintf(addr, "%X", opcode);
-	// if(sizeof(addr) < 6 && (strcmp(segments->second, "BYTE") != 0)) {
-	// 	int diff = 6 - sizeof(addr);
-		
-	// 	for(int index = 0; index < diff; index++) { final_addr[index] = '0'; }
-	// 	// strcat(final_addr, addr); 
-	// }
-
 
 	if(strcmp(segments->second, "START") == 0){
 		fprintf(file, "%-5X\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, address);	
@@ -360,32 +358,43 @@ void writeToLstFile(FILE* file, int address, segment* segments, int opcode) {
 		fprintf(file, "%-5X\t%-5s\t%-5s\t%s", address, segments->first, segments->second, segments->third);
 	} else if(strcmp(segments->second, "RESB") == 0 || strcmp(segments->second, "RESW") == 0) {
 		fprintf(file, "%-5X\t%-5s\t%-5s\t%s\n", address, segments->first, segments->second, segments->third);
+	} else if(strcmp(segments->second, "RSUB") == 0) {
+		fprintf(file, "%-5X\t%-5s\t%-17s\t%0.6X\n", address, segments->first, segments->second, opcode);
+	} else if(segments->flag) {
+		fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s,X\t%0.6X\n", address, segments->first, segments->second, segments->third, opcode);
 	} else {
 		if(strcmp(segments->second, "BYTE") == 0) {
-			fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
+			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%0.2X\n", address, segments->first, segments->second, segments->third, opcode);
 		} else {
-			if(opcode < 0x10) {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t00000%X\n", address, segments->first, segments->second, segments->third, opcode);
-			} else if(opcode < 0x100) {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t0000%X\n", address, segments->first, segments->second, segments->third, opcode);
-			} else if(opcode < 0x1000) {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t000%X\n", address, segments->first, segments->second, segments->third, opcode);
-			} else if(opcode < 0x10000) {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t00%X\n", address, segments->first, segments->second, segments->third, opcode);
-			} else if(opcode < 0x100000) {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t0%X\n", address, segments->first, segments->second, segments->third, opcode);
-			} else {
-				fprintf(file, "%-5X\t%-5s\t%-5s\t%-5s\t%X\n", address, segments->first, segments->second, segments->third, opcode);
-			}
+			fprintf(file, "%-5X\t%-5s\t%-5s\t%-10s\t%0.6X\n", address, segments->first, segments->second, segments->third, opcode);
 		}
 	}
 }
 
+
 // To implement Pass 2 of the assembler for Project 3,
 // Add the following function to your existing Project 2 code
 void writeToObjFile(FILE* file, objectFileData fileData) {
-	// fprintf(file, "%s", fileData.recordType);
-}
+	if(fileData.recordType == 'H') {
+		fprintf(file, "%c%s %0.6X%0.6X\n", fileData.recordType, fileData.programName, 
+										   fileData.startAddress, fileData.programSize);
+	} else if(fileData.recordType == 'E') {
+		fprintf(file, "%c%0.6X", fileData.recordType, fileData.startAddress);
+	} else if(fileData.recordType == 'T') {
+		fprintf(file, "%c%0.6X%0.2X", fileData.recordType, fileData.recordAddress, fileData.recordByteCount);
+
+		for(int index = 0; index < fileData.recordEntryCount; index++) {
+			if (fileData.recordEntries[index].numBytes == 1) {
+				fprintf(file, "%02X", fileData.recordEntries[index].value);
+			}
+			else {
+				fprintf(file, "%06X", fileData.recordEntries[index].value);
+			}
+		}// end for loop
+
+		fprintf(file, "\n");
+	}// end if / else if
+}// end writeToObjFile()
 
 
 int hexToDecimal(struct segment* temp) {
@@ -410,6 +419,7 @@ int hexToDecimal(struct segment* temp) {
 	return decimal_value;
 }
 
+
 void removeChar(char* string, char removed_char) {
     int i, j;
     i = 0;
@@ -419,12 +429,3 @@ void removeChar(char* string, char removed_char) {
         } else { i++; }
     }// end while
 }// end removeChar()
-
-
-//TODO: Testing
-void printlstFile(address* addresses, struct segment* seg, int value) {
-	if (value > 0) {
-		printf("%X\t%s\t%s\t%s\t%X\n", addresses->current, seg->first, seg->second, seg->third, value);
-	} else { printf("%X\t%s\t%s\t%s\n", addresses->current, seg->first, seg->second, seg->third); }
-	
-}

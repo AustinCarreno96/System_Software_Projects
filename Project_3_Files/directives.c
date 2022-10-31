@@ -11,7 +11,6 @@ enum directives {
 int getByteWordValue(int directiveType, char* string) {
 	char* buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
 	char* final_buffer = (char*)malloc(sizeof(char) * strlen(string) + 1);
-	int* test_2 = (int*)malloc(sizeof(char) * strlen(string) + 1);
 	char* end;
 
 	if(directiveType == WORD) {
@@ -19,14 +18,12 @@ int getByteWordValue(int directiveType, char* string) {
 	} else {
 		if(string[0] == 'C') {
 			for (int index = 2; index < strlen(string) - 1; index++) {
-				test_2[index] = (int)(string[index]);
-				sprintf(buffer, "%X", test_2[index]);
+				sprintf(buffer, "%X", (int)(string[index]));
 				strcat(final_buffer, buffer);
 			}
 			return strtol(final_buffer, &end, 16);
 		} else if(string[0]== 'X') {
 			for (int index = 2; index < strlen(string) - 1; index++) { final_buffer[index - 2] = string[index]; }
-			int t = strtol(final_buffer, &end, 16);
 			return strtol(final_buffer, &end, 16);
 		}
 	}
