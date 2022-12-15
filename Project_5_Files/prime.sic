@@ -1,0 +1,60 @@
+PRIME   START   0000
+NUM     RESW    1
+HI      RESW    1
+LO      RESW    1
+ZERO    WORD    0
+TWO     WORD    2       # For finding num / 2
+MAX     WORD    999
+DIFF    WORD    32      # For caps to lowercase lettering
+DEVICE  WORD    42      # Device being written to
+
+# Out of Range text
+RNGTXT  BYTE    C'ERROR: INPUT OUT OF RANGE!'
+RNGBUF  RESB    26
+RNGLEN  WORD    26
+
+# Less than 2 text
+LESSTW  BYTE    C'IS NOT PRIME: LESS THAN 2'
+TWBUF   RESB    25
+TWLEN   WORD    25
+
+# Is prime text
+ISPRIM  BYTE    C'IS PRIME'
+PRBUF   RESB    8
+PRLEN   WORD    8
+
+# Calculating num / 2
+CALC    LDA     NUM
+        DIV     TWO
+        STA     HI
+        J
+# Checking Range
+FIRST   LDA     NUM             # Load number
+        COMP    MAX             # Compare to max digit
+        JGT     RANGE           # If > max go to RANGE
+        COMP    2               # Compare to 2
+#        JLT     TWO             # If < 2 go to TWO
+        
+# When input is less than 2
+#TWO     
+
+# Out of range text
+RANGE   LDCH    RNGTXT,X
+        ADD     DIFF
+        STCH    RNGBUF,X
+        TIX     RNGLEN
+        JLT     RANGE
+
+LOOP    
+
+# Clearing index
+WREC    LDX     ZERO
+
+
+FIN     LDCH    RNGBUF,X
+        WD      DEVICE
+        TIX     RNGLEN
+        JLT     FIN
+        LDL     ZERO
+        RSUB
+        END     FIRST
