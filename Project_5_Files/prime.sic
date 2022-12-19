@@ -1,69 +1,160 @@
 PRIME   START   0000
-NUM     RESW    1
-HI      RESW    1
+#NUM     RESW    1
+NUM     WORD    100
 LO      RESW    1
+LO2     RESW    1
+TEMP    RESW    1
+TEMPII  RESW    1
+HALF    RESW    1
 ZERO    WORD    0
 TWO     WORD    2       # For finding num / 2
+THREE   WORD    3
+NINE    WORD    9
+TEN     WORD    10
 MAX     WORD    999
-DIFF    WORD    32      # For caps to lowercase lettering
+HUND    WORD    100
+NINNIN  WORD    99
+CRIT    RESW    1
 DEVICE  WORD    42      # Device being written to
 ASCII	WORD	48
-
-# Out of Range text
 RNGTXT  BYTE    C'ERROR: INPUT OUT OF RANGE!'
 RNGBUF  RESB    26
 RNGLEN  WORD    26
+LESSTW  BYTE    C' LESS THAN 2'
+TWBUF   RESB    12
+TWLEN   WORD    12
+NPTXT   BYTE    C' IS NOT PRIME: '
+NPBUF   RESB    14
+NPLEN   WORD    14
+EVTXT   BYTE    C' EVEN NUMBER, BUT NOT 2'
+EVBUF   RESB    23
+EVLEN   WORD    23
+IPTXT   BYTE    C' IS PRIME'
+IPBUF   RESB    9
+IPLEN   WORD    9
+EDBTXT  BYTE    C' EVENLY DIVISIBLE BY '
+EDBBUF  RESB    21
+EDBLEN  WORD    21
 
-# Less than 2 text
-LESSTW  BYTE    C'IS NOT PRIME: LESS THAN 2'
-TWBUF   RESB    25
-TWLEN   WORD    25
-
-# Is prime text
-ISPRIM  BYTE    C'IS PRIME'
-PRBUF   RESB    8
-PRLEN   WORD    8
-
-# Checking Range
 FIRST   LDA     NUM             # Load number
-        COMP    MAX             # Compare to max digit
-        JGT     ERRMSG          # If > max go to RANGE
-        COMP    2               # Compare to 2
-        JLT     ERRMSG           
-        LDA     NUM             # Jumping to print if I can
-        COMP    10
-        JLT     PRINT
-        COMP    99
-        JGT     IIIDIG
-
-IIDIG   DIV     10
-        ADD     ASCII
-
-        
-# When input is less than 2
-#TWO     
-
-# Calculating num / 2
-CALC    LDA     NUM
+        COMP    MAX             # Lines 45 - 49: Validating 0 < num < 999
+        JGT     ERRMSG          
+        COMP    ZERO            
+        JLT     ERRMSG     
+        COMP    NINE
+        JGT     TENDIG
+        JSUB    PRNM
+        COMP    TWO             # If < 2 not prime or if = 2 is prime
+        JLT     NPMSG       
+        JEQ     IPMSG
+        COMP    THREE           # If = 3 is prime
+        JEQ     IPMSG
+COM     JSUB    CALC2            # Calculate remainder
+        LDA     LO2
+        COMP    ZERO
+        JEQ     NPMSG           # Not prime but even number
+ODD     LDX     THREE
+ODLP    JSUB    CALC
+        TIX     HALF
+        TIX     HALF
+        JLT     ODLP
+        JGT     IPMSG
+TENDIG  COMP    NINNIN
+        JGT     HUNDIG
+        DIV     TEN
+        JSUB    PRNM
+        MUL     TEN
+        STA     TEMP
+        LDA     NUM
+        SUB     TEMP
+        JSUB    PRNM
+        J       COM
+HUNDIG  DIV     HUND
+        JSUB    PRNM
+        MUL     HUND
+        STA     TEMP            # Storing (quotient * divisor) to find remainder
+        LDA     NUM           
+        SUB     TEMP            # Getting remainder
+        STA     TEMPII              # Storing remainder
+        DIV     TEN
+        JSUB    PRNM
+        MUL     TEN
+        STA     TEMP
+        LDA     TEMPII
+        SUB     TEMP
+        JSUB    PRNM
+        J       COM
+CALC2   LDA     NUM             # Calculating num / 2
         DIV     TWO
-        STA     HI
-        J
-
-# Out of range text
-ERRMSG  LDCH    RNGTXT,X
-        ADD     DIFF
+        STA     HALF
+        MUL     TWO
+        STA     TEMP            # Storing (quotient * divisor) to find remainder
+        LDA     NUM           
+        SUB     TEMP            # Getting remainder
+        STA     LO2              # Storing remainder
+        RSUB
+CALC    LDA     NUM
+        STX     CRIT
+        DIV     CRIT
+        MUL     CRIT
+        STA     TEMP            # Storing (quotient * divisor) to find remainder
+        LDA     NUM           
+        SUB     TEMP            # Getting remainder
+        STA     LO              # Storing remainder
+        RSUB
+ERRMSG  LDX     ZERO            # Out of range text
+ERRLP   LDCH    RNGTXT,X
         STCH    RNGBUF,X
-        TIX     RNGLEN
-        JLT     RANGE
-
-# Clearing index
-WREC    LDX     ZERO
-
-
-PRINT   LDCH    RNGBUF,X
         WD      DEVICE
         TIX     RNGLEN
-        JLT     FIN
-        LDL     ZERO
+        JLT     ERRLP
+        J       EXIT
+NPMSG   LDX     ZERO          # Not Prime message
+NPLP    LDCH    NPTXT,X
+        STCH    NPBUF,X
+        WD      DEVICE
+        TIX     NPLEN
+        JLT     NPLP
+        LDA     NUM
+        COMP    TWO
+        JLT     LTMSG
+        LDA     LO2
+        COMP    ZERO
+        JEQ     EVMSG
+EDBMSG  LDX     ZERO
+EDBLP   LDCH    EDBTXT,X
+        STCH    EDBBUF,X
+        WD      DEVICE
+        TIX     EDBLEN
+        JLT     EDBLP
+        LDA     CRIT
+        JSUB    PRNM
+        J       EXIT
+LTMSG   LDX     ZERO            # Less than two message
+LTLP    LDCH    LESSTW,X
+        STCH    TWBUF,X
+        WD      DEVICE
+        TIX     TWLEN
+        JLT     LTLP
+        J       EXIT
+EVMSG   LDX     ZERO            # Even but not prime message
+EVLP    LDCH    EVTXT,X
+        STCH    EVBUF,X
+        WD      DEVICE
+        TIX     EVLEN
+        JLT     EVLP
+        J       EXIT
+IPMSG   LDX     ZERO
+IPLP    LDCH    IPTXT,X
+        STCH    IPBUF,X
+        WD      DEVICE
+        TIX     IPLEN
+        JLT     IPLP
+        J       EXIT
+PRNM    ADD      ASCII
+        WD       DEVICE
+        SUB      ASCII
+        RSUB
+EXIT    LDL     ZERO            # Subroutine to exit program
         RSUB
         END     FIRST
